@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
         }
         cout << result.cost << endl;
         for (auto it = result.path.rbegin(); it != result.path.rend(); ++it) {
-            cout << (*it + 1) << " "; // Convert 0-based to 1-based indexing
+            cout << (*it) << " "; // Convert 0-based to 1-based indexing
         }
         cout << endl;
     } else {
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
         cout << "The cost of the most efficient tour = " << result.cost << endl;
         cout << "The optimal tour path is: ";
         for (auto it = result.path.rbegin(); it != result.path.rend(); ++it) {
-            cout << (*it + 1) << " "; // Convert 0-based to 1-based indexing
+            cout << (*it) << " "; // Convert 0-based to 1-based indexing
         }
         cout << endl;
     }
