@@ -1,26 +1,26 @@
-# Compiler and flags
-CPP = g++
-CFLAGS = -lm
-COPTFLAGS = -O3 -Wall
+CXX = g++
+CXXFLAGS = -Wall -O3 -std=c++11
 
-# Directories
+# Directory structure
 BUILD_DIR = build
+SRC_DIR = .
 
-# Source file
-SRC = karp_basic.cpp
+# Targets
+TARGETS = basic serial
 
-# Target executable
-TARGET = $(BUILD_DIR)/karp_basic
-
-# Default target
-all: $(TARGET)
-
-# Building the target executable
-$(TARGET): $(SRC)
+# Create build directory if it doesn't exist
+$(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
-	$(CPP) $(SRC) -o $(TARGET) $(CFLAGS) $(COPTFLAGS)
 
-# Clean up
-.PHONY: clean
+all:	$(BUILD_DIR) $(addprefix $(BUILD_DIR)/, $(TARGETS))
+
+$(BUILD_DIR)/basic: basic.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $<
+
+$(BUILD_DIR)/serial: serial.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $<
+
 clean:
 	rm -rf $(BUILD_DIR)
+
+.PHONY: all clean
