@@ -1,30 +1,26 @@
 # Compiler and flags
-CC = gcc
-CFLAGS = -O3 -Wall -std=c99
+CPP = g++
+CFLAGS = -lm
+COPTFLAGS = -O3 -Wall
+
+# Directories
+BUILD_DIR = build
+
+# Source file
+SRC = karp_basic.cpp
 
 # Target executable
-TARGET = tsp
-
-# Source files
-SRCS = tsp.c
-
-# Object files
-OBJS = $(SRCS:.c=.o)
+TARGET = $(BUILD_DIR)/karp_basic
 
 # Default target
-all: karp_basic
+all: $(TARGET)
 
-# Linking the executable
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
-
-# Compiling source files
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# Building the target executable
+$(TARGET): $(SRC)
+	mkdir -p $(BUILD_DIR)
+	$(CPP) $(SRC) -o $(TARGET) $(CFLAGS) $(COPTFLAGS)
 
 # Clean up
+.PHONY: clean
 clean:
-	rm -f $(OBJS) $(TARGET)
-
-# Phony targets
-.PHONY: all clean
+	rm -rf $(BUILD_DIR)
