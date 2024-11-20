@@ -9,3 +9,7 @@ make all
 ./build/basic
 ./build/serial
 make clean
+
+# For visualizer
+module load python
+./build/basic --viz | python3 utils/visualizer.py
