@@ -18,15 +18,13 @@ int dist[n + 1][n + 1] = {
 
 // DP table to store the cost of visiting subsets of nodes
 int dp[1 << n][n];
-int parent[1 << n][n]; // Table to store the parent of each node for backtracking
 
 // Main function implementing Held-Karp
-pair<int, vector<int>> heldKarp() {
-    // Initialize DP table and parent table
+int heldKarp() {
+    // Initialize DP table
     for (int mask = 0; mask < (1 << n); mask++) {
         for (int i = 0; i < n; i++) {
             dp[mask][i] = MAX;
-            parent[mask][i] = -1;
         }
     }
 
@@ -49,11 +47,7 @@ pair<int, vector<int>> heldKarp() {
                 int prevMask = mask & ~(1 << k);
                 for (int m = 1; m < n; m++) {
                     if (!(prevMask & (1 << m))) continue;
-                    int newCost = dp[prevMask][m] + dist[m + 1][k + 1];
-                    if (newCost < dp[mask][k]) {
-                        dp[mask][k] = newCost;
-                        parent[mask][k] = m;
-                    }
+                    dp[mask][k] = min(dp[mask][k], dp[prevMask][m] + dist[m + 1][k + 1]);
                 }
             }
         }
@@ -61,46 +55,17 @@ pair<int, vector<int>> heldKarp() {
 
     // Find the optimal tour cost
     int opt = MAX;
-    int lastNode = -1;
     int fullMask = (1 << n) - 1;
     for (int k = 1; k < n; k++) {
-        int tourCost = dp[fullMask & ~(1 << 0)][k] + dist[k + 1][1];
-        if (tourCost < opt) {
-            opt = tourCost;
-            lastNode = k;
-        }
+        opt = min(opt, dp[fullMask & ~(1 << 0)][k] + dist[k + 1][1]);
     }
 
-    // Backtrack to find the tour path
-    vector<int> path;
-    int mask = (1 << n) - 1;
-    int currentNode = lastNode;
-    while (currentNode != -1) {
-        path.push_back(currentNode + 1); // Convert 0-based to 1-based
-        int nextMask = mask & ~(1 << currentNode);
-        currentNode = parent[mask][currentNode];
-        mask = nextMask;
-    }
-
-    // Add the starting node to complete the cycle
-    path.push_back(1);
-    reverse(path.begin(), path.end());
-
-    return {opt, path};
+    return opt;
 }
 
 int main() {
     // Solve TSP using Held-Karp
-    auto result = heldKarp();
-    int cost = result.first;
-    vector<int> path = result.second;
-
-    cout << "The cost of the most efficient tour = " << cost << endl;
-    cout << "The optimal tour path is: ";
-    for (int node : path) {
-        cout << node << " ";
-    }
-    cout << endl;
-
+    int result = heldKarp();
+    cout << "The cost of the most efficient tour = " << result << endl;
     return 0;
 }
