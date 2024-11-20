@@ -2,25 +2,25 @@
 #include <vector>
 #include <limits>
 #include <cmath>
+#include <fstream>
+#include <sstream>
+#include "helper.hpp"
 
 using namespace std;
 
 // Constants
-const int n = 4; // Number of nodes in the graph
 const int MAX = numeric_limits<int>::max(); // Use a large value as infinity
 
-// Distance matrix representing the graph
-int dist[n + 1][n + 1] = {
-    {0, 0, 0, 0, 0},    {0, 0, 10, 15, 20},
-    {0, 10, 0, 25, 25}, {0, 15, 25, 0, 30},
-    {0, 20, 25, 30, 0},
-};
-
-// DP table to store the cost of visiting subsets of nodes
-int dp[1 << n][n];
-
 // Main function implementing Held-Karp
-int heldKarp() {
+int heldKarp(vector<vector<int>>dist) {
+    const int n = dist.size(); // Number of nodes in the input graph
+
+    addExtraRowAndColumn(dist);
+    printMatrix(dist);
+
+    // DP table to store the cost of visiting subsets of nodes
+    int dp[1 << n][n];
+
     // Initialize DP table
     for (int mask = 0; mask < (1 << n); mask++) {
         for (int i = 0; i < n; i++) {
@@ -65,7 +65,9 @@ int heldKarp() {
 
 int main() {
     // Solve TSP using Held-Karp
-    int result = heldKarp();
+    vector<vector<int>> loadDist = loadMatrixFromCSV("dist_matrix.csv");
+    
+    int result = heldKarp(loadDist);
     cout << "The cost of the most efficient tour = " << result << endl;
     return 0;
 }
