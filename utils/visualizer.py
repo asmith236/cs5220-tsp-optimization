@@ -16,10 +16,16 @@ def read_solution(outfile):
     """Read solution path from .out file"""
     try:
         with open(outfile, 'r') as f:
-            # Remove parentheses and split by comma
-            path_str = f.readline().strip('()\n')
-            path = list(map(int, path_str.split(',')))
-        return path
+            lines = f.readlines()
+            # Find the line that starts with 'Path:'
+            for line in lines:
+                if line.startswith("Path:"):
+                    # Extract the path and convert it into a tuple
+                    path_str = line.split("Path:")[1].strip()
+                    path = tuple(map(int, path_str.split(" -> ")))
+                    return path
+        print(f"No valid 'Path:' line found in {outfile}")
+        sys.exit(1)
     except Exception as e:
         print(f"Error reading solution from {outfile}: {e}")
         sys.exit(1)
