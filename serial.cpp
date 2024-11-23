@@ -1,77 +1,52 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-// Constants
-const int n = 4; // Number of nodes in the graph
-const int MAX = numeric_limits<int>::max(); // Use a large value as infinity
-
-// Distance matrix representing the graph
-int dist[n][n] = {
-    { 0, 10, 15, 20 },
-    { 10, 0, 35, 25 },
-    { 15, 35, 0, 30 },
-    { 20, 25, 30, 0 }
-};
-
-// DP table to store the cost of visiting subsets of nodes
-int dp[1 << n][n];
-
-// Table to track the previous node in the optimal path
-int parent[1 << n][n];
-
-// Structure to hold TSP result
 struct TSPResult {
     int cost;
     vector<int> path;
 };
 
-// Function to reconstruct the tour path
-vector<int> getPath(int fullMask, int lastNode) {
-    vector<int> path;
-    int mask = fullMask;
-
-    // Reconstruct path backwards using the parent table
-    while (lastNode != -1) {
-        path.push_back(lastNode);
-        int prevMask = mask & ~(1 << lastNode);
-        lastNode = parent[mask][lastNode];
-        mask = prevMask;
-    }
-
-    reverse(path.begin(), path.end()); // Reverse to get the correct order
-    return path;
-}
-
-// Main function implementing Held-Karp
-TSPResult heldKarp() {
-    // Initialize DP table
-    for (int mask = 0; mask < (1 << n); mask++) {
-        for (int i = 0; i < n; i++) {
-            dp[mask][i] = MAX;
-            parent[mask][i] = -1;
+// Function to read graph from file
+vector<vector<int>> readGraphFromFile(const string& filename) {
+    ifstream file(filename);
+    int n;
+    file >> n;
+    
+    vector<vector<int>> dist(n, vector<int>(n));
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            file >> dist[i][j];
         }
     }
+    return dist;
+}
 
-    // Base case: cost to go from starting node (0) to every other node
-    for (int k = 1; k < n; k++) {
+// Modified Held-Karp to use vector instead of fixed arrays
+TSPResult heldKarp(const vector<vector<int>>& dist) {
+    int n = dist.size();
+    vector<vector<int>> dp(1 << n, vector<int>(n, INT_MAX));
+    vector<vector<int>> parent(1 << n, vector<int>(n, -1));
+
+    // Base case
+    for(int k = 1; k < n; k++) {
         dp[1 << k][k] = dist[0][k];
         parent[1 << k][k] = 0;
     }
 
-    // Iterate over subsets of size s
-    for (int s = 2; s <= n; s++) {
-        for (int mask = 0; mask < (1 << n); mask++) {
-            if (__builtin_popcount(mask) != s) continue;
+    // Iterate over subsets
+    for(int s = 2; s <= n; s++) {
+        for(int mask = 0; mask < (1 << n); mask++) {
+            if(__builtin_popcount(mask) != s) continue;
 
-            for (int k = 0; k < n; k++) {
-                if (!(mask & (1 << k))) continue;
+            for(int k = 0; k < n; k++) {
+                if(!(mask & (1 << k))) continue;
 
                 int prevMask = mask & ~(1 << k);
-                for (int m = 0; m < n; m++) {
-                    if (!(prevMask & (1 << m))) continue;
+                for(int m = 0; m < n; m++) {
+                    if(!(prevMask & (1 << m))) continue;
 
                     int newCost = dp[prevMask][m] + dist[m][k];
-                    if (newCost < dp[mask][k]) {
+                    if(newCost < dp[mask][k]) {
                         dp[mask][k] = newCost;
                         parent[mask][k] = m;
                     }
@@ -80,54 +55,65 @@ TSPResult heldKarp() {
         }
     }
 
-    // Find the optimal tour cost
-    int opt = MAX;
+    // Find optimal tour
+    int opt = INT_MAX;
     int fullMask = (1 << n) - 1;
     int lastNode = -1;
-    for (int k = 1; k < n; k++) {
+    for(int k = 1; k < n; k++) {
         int cost = dp[fullMask & ~(1 << 0)][k] + dist[k][0];
-        if (cost < opt) {
+        if(cost < opt) {
             opt = cost;
             lastNode = k;
         }
     }
 
-    // Reconstruct the path
-    vector<int> path = getPath(fullMask, lastNode);
-    path.push_back(0); // Return to starting node
+    // Reconstruct path
+    vector<int> path;
+    int mask = fullMask;
+    while(lastNode != -1) {
+        path.push_back(lastNode);
+        int prevMask = mask & ~(1 << lastNode);
+        lastNode = parent[mask][lastNode];
+        mask = prevMask;
+    }
+    reverse(path.begin(), path.end());
+    path.push_back(0);
 
-    return { opt, path };
+    return {opt, path};
 }
 
 int main(int argc, char* argv[]) {
+    vector<vector<int>> dist;
     bool visualize = false;
-    for (int i = 1; i < argc; i++) {
-        if (string(argv[i]) == "--viz") visualize = true;
+
+    if(argc > 1) {
+        dist = readGraphFromFile(argv[1]);
+        visualize = (argc > 2 && string(argv[2]) == "--viz");
+    } else {
+        // Default 4x4 matrix if no input file provided
+        dist = {
+            { 0, 10, 15, 20 },
+            { 10, 0, 35, 25 },
+            { 15, 35, 0, 30 },
+            { 20, 25, 30, 0 }
+        };
     }
 
-    TSPResult result = heldKarp();
+    TSPResult result = heldKarp(dist);
 
-    if (visualize) {
-        // Output format for Python visualizer
-        cout << n << endl; // Number of vertices
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                cout << dist[i][j] << " ";
-            }
+    if(visualize) {
+        cout << dist.size() << endl;
+        for(const auto& row : dist) {
+            for(int val : row) cout << val << " ";
             cout << endl;
         }
         cout << result.cost << endl;
-        for (auto it = result.path.rbegin(); it != result.path.rend(); ++it) {
-            cout << (*it) << " "; // Convert 0-based to 1-based indexing
-        }
+        for(int v : result.path) cout << v << " ";
         cout << endl;
     } else {
-        // Print cost and path in default output
-        cout << "The cost of the most efficient tour = " << result.cost << endl;
-        cout << "The optimal tour path is: ";
-        for (auto it = result.path.rbegin(); it != result.path.rend(); ++it) {
-            cout << (*it) << " "; // Convert 0-based to 1-based indexing
-        }
+        cout << "Cost: " << result.cost << endl;
+        cout << "Path: ";
+        for(int v : result.path) cout << v << " ";
         cout << endl;
     }
 
