@@ -13,3 +13,7 @@ make clean
 
 module load python
 ./build/basic --viz | python3 utils/visualizer.py
+
+# References
+
+https://www.kaggle.com/datasets/mexwell/traveling-salesman-problem/data
