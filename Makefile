@@ -12,13 +12,15 @@ TARGETS = basic serial
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-all:	$(BUILD_DIR) $(addprefix $(BUILD_DIR)/, $(TARGETS))
+all: $(BUILD_DIR) $(addprefix $(BUILD_DIR)/, $(TARGETS))
 
-$(BUILD_DIR)/basic: basic.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ $<
+# Build the basic target
+$(BUILD_DIR)/basic: basic.cpp $(SRC_DIR)/common/constants.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ basic.cpp $(SRC_DIR)/common/constants.cpp
 
-$(BUILD_DIR)/serial: serial.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ $<
+# Build the serial target
+$(BUILD_DIR)/serial: serial.cpp $(SRC_DIR)/common/constants.cpp | $(BUILD_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ serial.cpp $(SRC_DIR)/common/constants.cpp
 
 clean:
 	rm -rf $(BUILD_DIR)

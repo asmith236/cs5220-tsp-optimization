@@ -1,20 +1,20 @@
 #include <bits/stdc++.h>
+#include "common/constants.hpp" // Include the common constants file
 using namespace std;
-#define V 4
 
 struct TSPResult {
     int cost;
     vector<int> path;
 };
 
-TSPResult travellingSalesmanProblem(int graph[][V], int s) {
+TSPResult travellingSalesmanProblem(int graph[][n], int s) {
     vector<int> vertex;
-    for(int i = 0; i < V; i++) {
+    for (int i = 0; i < n; i++) {
         if (i != s) vertex.push_back(i);
     }
 
     TSPResult result;
-    result.cost = INT_MAX;
+    result.cost = MAX; // Use the MAX constant
     vector<int> best_path;
 
     do {
@@ -40,32 +40,26 @@ TSPResult travellingSalesmanProblem(int graph[][V], int s) {
 }
 
 int main(int argc, char* argv[]) {
-    int graph[][V] = {
-        { 0, 10, 15, 20 },
-        { 10, 0, 35, 25 },
-        { 15, 35, 0, 30 },
-        { 20, 25, 30, 0 }
-    };
     int s = 0;
 
     bool visualize = false;
-    for(int i = 1; i < argc; i++) {
-        if(string(argv[i]) == "--viz") visualize = true;
+    for (int i = 1; i < argc; i++) {
+        if (string(argv[i]) == "--viz") visualize = true;
     }
 
-    TSPResult result = travellingSalesmanProblem(graph, s);
+    TSPResult result = travellingSalesmanProblem(dist, s); // Use `dist` from constants.h
 
-    if(visualize) {
+    if (visualize) {
         // Output format for Python visualizer
-        cout << V << endl;  // Number of vertices
-        for(int i = 0; i < V; i++) {
-            for(int j = 0; j < V; j++) {
-                cout << graph[i][j] << " ";
+        cout << n << endl;  // Number of vertices
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                cout << dist[i][j] << " ";
             }
             cout << endl;
         }
         cout << result.cost << endl;
-        for(int v : result.path) {
+        for (int v : result.path) {
             cout << v << " ";
         }
         cout << endl;

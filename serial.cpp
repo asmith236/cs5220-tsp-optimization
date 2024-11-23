@@ -1,17 +1,7 @@
 #include <bits/stdc++.h>
+#include "common/constants.hpp" // Include the constants header file
+
 using namespace std;
-
-// Constants
-const int n = 4; // Number of nodes in the graph
-const int MAX = numeric_limits<int>::max(); // Use a large value as infinity
-
-// Distance matrix representing the graph
-int dist[n][n] = {
-    { 0, 10, 15, 20 },
-    { 10, 0, 35, 25 },
-    { 15, 35, 0, 30 },
-    { 20, 25, 30, 0 }
-};
 
 // DP table to store the cost of visiting subsets of nodes
 int dp[1 << n][n];
