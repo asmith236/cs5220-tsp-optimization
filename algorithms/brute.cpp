@@ -1,70 +1,53 @@
 #include <bits/stdc++.h>
-#include "common/constants.hpp" // Include the common constants file
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm> // For std::next_permutation
+#include <limits>    // For std::numeric_limits
+#include "../common/helpers.hpp" // Include the common constants file
+#include "../common/constants.hpp"
+
 using namespace std;
 
-struct TSPResult {
-    int cost;
-    vector<int> path;
-};
+void init() {
 
-TSPResult travellingSalesmanProblem(int graph[][n], int s) {
-    vector<int> vertex;
-    for (int i = 0; i < n; i++) {
-        if (i != s) vertex.push_back(i);
-    }
-
-    TSPResult result;
-    result.cost = MAX; // Use the MAX constant
-    vector<int> best_path;
-
-    do {
-        int current_pathweight = 0;
-        int k = s;
-        vector<int> current_path = {s};  // Start with source
-
-        for (size_t i = 0; i < vertex.size(); i++) {
-            current_pathweight += graph[k][vertex[i]];
-            k = vertex[i];
-            current_path.push_back(k);
-        }
-        current_pathweight += graph[k][s];
-        current_path.push_back(s);  // Return to source
-
-        if (current_pathweight < result.cost) {
-            result.cost = current_pathweight;
-            result.path = current_path;
-        }
-    } while (next_permutation(vertex.begin(), vertex.end()));
-
-    return result;
 }
 
-int main(int argc, char* argv[]) {
-    int s = 0;
+TSPResult solve(vector<pair<double, double>> coordinates) {
+    // should get the distances from some place
 
-    bool visualize = false;
-    for (int i = 1; i < argc; i++) {
-        if (string(argv[i]) == "--viz") visualize = true;
+    int n = coordinates.size();
+
+    // compute the distance matrix
+    vector<vector<double>> distances(n, vector<double>(n, 0.0));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            distances[i][j] = distance(coordinates[i], coordinates[j]);
+        }
     }
 
-    TSPResult result = travellingSalesmanProblem(dist, s); // Use `dist` from constants.h
+    vector<int> cities(n);
+    for (int i = 0; i < n; ++i) cities[i] = i; // Initialize cities as [0, 1, ..., n-1]
 
-    if (visualize) {
-        // Output format for Python visualizer
-        cout << n << endl;  // Number of vertices
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                cout << dist[i][j] << " ";
-            }
-            cout << endl;
+    double min_distance = numeric_limits<double>::infinity();
+    vector<int> best_path;
+    do {
+        // Step 3: Calculate the total distance for the current permutation
+        double total_distance = 0.0;
+        for (int i = 0; i < n - 1; ++i) {
+            total_distance += distances[cities[i]][cities[i + 1]];
         }
-        cout << result.cost << endl;
-        for (int v : result.path) {
-            cout << v << " ";
+        total_distance += distances[cities[n - 1]][cities[0]]; // Return to the starting point
+
+        // Step 4: Update the best path and minimum distance if needed
+        if (total_distance < min_distance) {
+            min_distance = total_distance;
+            best_path = cities;
         }
-        cout << endl;
-    } else {
-        cout << result.cost << endl;
-    }
-    return 0;
+    } while (next_permutation(cities.begin(), cities.end()));
+
+    TSPResult result;
+    result.cost = min_distance;
+    result.path = best_path;
+    return result;
 }
