@@ -1,28 +1,31 @@
-CXX = g++
-CXXFLAGS = -Wall -O3 -std=c++11
+CPP=g++
+CFLAGS=-lm
+OPTFLAGS=-O3 
 
-# Directory structure
-BUILD_DIR = build
-SRC_DIR = .
+SRC_DIR=common
+ALGO_DIR=algorithms
+BUILD_DIR=build
 
-# Targets
-TARGETS = brute dp
+all: brute 
 
-# Create build directory if it doesn't exist
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+brute: $(BUILD_DIR)/brute
+dp: $(BUILD_DIR)/dp
+greedy: $(BUILD_DIR)/greedy
+genetic: $(BUILD_DIR)/genetic
 
-all: $(BUILD_DIR) $(addprefix $(BUILD_DIR)/, $(TARGETS))
+$(BUILD_DIR)/brute: $(SRC_DIR)/main.cpp $(ALGO_DIR)/brute.cpp
+	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
 
-# Build the brute target
-$(BUILD_DIR)/brute: brute.cpp $(SRC_DIR)/common/constants.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ brute.cpp $(SRC_DIR)/common/constants.cpp
+$(BUILD_DIR)/dp: $(SRC_DIR)/main.cpp $(ALGO_DIR)/dp.cpp
+	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
 
-# Build the dp target
-$(BUILD_DIR)/dp: dp.cpp $(SRC_DIR)/common/constants.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ dp.cpp $(SRC_DIR)/common/constants.cpp
+$(BUILD_DIR)/greedy: $(SRC_DIR)/main.cpp $(ALGO_DIR)/greedy.cpp
+	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
+
+$(BUILD_DIR)/genetic: $(SRC_DIR)/main.cpp $(ALGO_DIR)/genetic.cpp
+	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
+
+.PHONY: clean
 
 clean:
-	rm -rf $(BUILD_DIR)
-
-.PHONY: all clean
+	rm -f $(BUILD_DIR)/*

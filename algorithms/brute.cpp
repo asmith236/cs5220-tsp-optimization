@@ -4,16 +4,16 @@
 #include <cmath>
 #include <algorithm> // For std::next_permutation
 #include <limits>    // For std::numeric_limits
-#include "../common/helpers.hpp" // Include the common constants file
-#include "../common/constants.hpp"
+#include "../common/algorithms.hpp" // Include the common constants file
 
 using namespace std;
 
-void init() {
-
+// Function to calculate the Euclidean distance between two points
+double distance(const std::pair<double, double>& p1, const std::pair<double, double>& p2) {
+    return std::sqrt(std::pow(p1.first - p2.first, 2) + std::pow(p1.second - p2.second, 2));
 }
 
-TSPResult solve(vector<pair<double, double>> coordinates) {
+TSPResult solve(const std::vector<std::pair<double, double>> &coordinates) {
     // should get the distances from some place
 
     int n = coordinates.size();
