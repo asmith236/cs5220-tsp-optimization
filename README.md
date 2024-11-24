@@ -2,7 +2,7 @@
 
 This CS 5220 final project aims to optimize the traveling salesman problem using dynamic programming and other high-performance computing techniques.
 
-## Methods to Run
+# Methods to Run
 
 make all
 ./build/brute --csv tiny.csv
