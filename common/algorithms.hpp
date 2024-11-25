@@ -7,7 +7,7 @@
 using namespace std;
 
 struct TSPResult {
-    int cost;
+    double cost;
     vector<int> path;
 };
 

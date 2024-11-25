@@ -6,7 +6,7 @@ SRC_DIR=common
 ALGO_DIR=algorithms
 BUILD_DIR=build
 
-all: brute 
+all: brute dp
 
 brute: $(BUILD_DIR)/brute
 dp: $(BUILD_DIR)/dp

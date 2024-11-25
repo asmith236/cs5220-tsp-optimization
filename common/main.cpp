@@ -7,6 +7,7 @@
 #include "algorithms.hpp" // Include header for algorithm-specific init and solve functions
 
 void printTSPResult(const TSPResult &result, std::ostream &out) {
+    out << std::fixed << std::setprecision(6); // Set fixed-point notation with 6 decimal places
     out << "Cost: " << result.cost << std::endl;
     out << "Path: ";
     for (size_t i = 0; i < result.path.size(); ++i) {
