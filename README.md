@@ -26,3 +26,9 @@ python utils/comparisons.py greedy dp (only compares greedy and dp)
 # References
 
 https://www.kaggle.com/datasets/mexwell/traveling-salesman-problem/data
+
+
+## Correctness check for greedy..?
+![alt text](image.png)
+
+for a large dataset of randomly generated 100k cities, i dont think I can check anything more to see if the correct path is being followed.
