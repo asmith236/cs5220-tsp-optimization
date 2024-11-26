@@ -4,9 +4,13 @@ This CS 5220 final project aims to optimize the traveling salesman problem using
 
 # Methods to Run
 
-make all
-./build/brute --csv tiny.csv
-make clean
+make all  
+./build/brute --csv data/tiny.csv  
+make clean  
+
+# For Correctness
+
+python utils/correctness.py --alg brute --csv tiny
 
 # For visualizer
 
