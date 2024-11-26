@@ -17,6 +17,12 @@ python utils/correctness.py --alg brute --csv tiny
 module load python
 python utils/visualizer.py tiny build/brute.out
 
+# For Timing Comparison Graph
+
+module load python
+python utils/comparisons.py (tries all implementations)
+python utils/comparisons.py greedy dp (only compares greedy and dp)
+
 # References
 
 https://www.kaggle.com/datasets/mexwell/traveling-salesman-problem/data
