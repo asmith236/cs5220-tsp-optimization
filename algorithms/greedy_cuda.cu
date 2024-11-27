@@ -86,8 +86,9 @@ __global__ void findNearestCityKernel(
 TSPResult solve(const std::vector<std::pair<double, double>>& coordinates) {
     int n = coordinates.size();
     
-    size_t free_mem, total_mem;
-    cudaMemGetInfo(&free_mem, &total_mem); // Command that gets the available free memory on the GPU
+    // Calculate optimal number of blocks
+    const int threadsPerBlock = BLOCK_SIZE;
+    const int numBlocks = (n + threadsPerBlock - 1) / threadsPerBlock;
     
     // Pinned memory: memory that is not swapped out to disk optimizes memory transfer between CPU and GPU
     // Putting x and y coordinates into pinned memory
@@ -106,36 +107,34 @@ TSPResult solve(const std::vector<std::pair<double, double>>& coordinates) {
     cudaMalloc(&d_coords_x, n * sizeof(double));
     cudaMalloc(&d_coords_y, n * sizeof(double));
     
+    // Copy coordinates to device
     cudaMemcpy(d_coords_x, h_coords_x, n * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_coords_y, h_coords_y, n * sizeof(double), cudaMemcpyHostToDevice);
     
-    // Initialize path construction variables
+    // Initialize path variables
     std::vector<int> path;
     double total_cost = 0.0;
-    std::vector<char> visited(n, 0);  // Using char instead of bool
+    std::vector<char> visited(n, 0);
     
-    // Allocate device memory for visited array
+    // Allocate device memory for visited array and results
     char* d_visited;
     cudaMalloc(&d_visited, n * sizeof(char));
+    
+    double* d_min_distances;
+    int* d_next_cities;
+    cudaMalloc(&d_min_distances, numBlocks * sizeof(double));  // Changed from BLOCK_SIZE to numBlocks
+    cudaMalloc(&d_next_cities, numBlocks * sizeof(int));
     
     // Start from city 0
     int current_city = 0;
     path.push_back(current_city);
-    visited[current_city] = 1;  // 1 stands for true, means that city has been visited.
+    visited[current_city] = 1;
     cudaMemcpy(d_visited, visited.data(), n * sizeof(char), cudaMemcpyHostToDevice);
     
-    // Allocate device memory for minimum distance search
-    double* d_min_distances;
-    int* d_next_cities;
-    cudaMalloc(&d_min_distances, BLOCK_SIZE * sizeof(double)); // We are going to use BLOCK_SIZE threads
-    cudaMalloc(&d_next_cities, BLOCK_SIZE * sizeof(int)); 
-    
-    const int threads_per_block = BLOCK_SIZE;
-    const int num_blocks = (n + threads_per_block - 1) / threads_per_block;
     // Main loop
     while (path.size() < n) {
-        // Launch kernel to find nearest city
-        findNearestCityKernel<<<BLOCK_SIZE, BLOCK_SIZE>>>(
+        // Launch kernel with calculated dimensions
+        findNearestCityKernel<<<numBlocks, threadsPerBlock>>>(
             d_coords_x,
             d_coords_y,
             d_visited,
@@ -145,16 +144,22 @@ TSPResult solve(const std::vector<std::pair<double, double>>& coordinates) {
             d_next_cities
         );
         
-        // Copy results back to host
-        std::vector<double> h_min_distances(BLOCK_SIZE);
-        std::vector<int> h_next_cities(BLOCK_SIZE);
-        cudaMemcpy(h_min_distances.data(), d_min_distances, BLOCK_SIZE * sizeof(double), cudaMemcpyDeviceToHost);
-        cudaMemcpy(h_next_cities.data(), d_next_cities, BLOCK_SIZE * sizeof(int), cudaMemcpyDeviceToHost);
+        // Check for kernel execution errors
+        cudaError_t err = cudaGetLastError();
+        if (err != cudaSuccess) {
+            printf("Kernel launch error: %s\n", cudaGetErrorString(err));
+        }
         
-        // Find global minimum
+        // Copy results back to host
+        std::vector<double> h_min_distances(numBlocks);  // Changed from BLOCK_SIZE to numBlocks
+        std::vector<int> h_next_cities(numBlocks);
+        cudaMemcpy(h_min_distances.data(), d_min_distances, numBlocks * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_next_cities.data(), d_next_cities, numBlocks * sizeof(int), cudaMemcpyDeviceToHost);
+        
+        // Find global minimum across all blocks
         double min_distance = INFINITY;
         int next_city = -1;
-        for (int i = 0; i < BLOCK_SIZE; i++) {
+        for (int i = 0; i < numBlocks; i++) {
             if (h_min_distances[i] < min_distance) {
                 min_distance = h_min_distances[i];
                 next_city = h_next_cities[i];
@@ -164,17 +169,15 @@ TSPResult solve(const std::vector<std::pair<double, double>>& coordinates) {
         // Update path
         current_city = next_city;
         path.push_back(current_city);
-        visited[current_city] = 1;  // Using 1 instead of true
+        visited[current_city] = 1;
         cudaMemcpy(d_visited, visited.data(), n * sizeof(char), cudaMemcpyHostToDevice);
         total_cost += min_distance;
     }
     
-    // Calculate distance back to start
-    double final_distance;
+    // Add return to start cost
     double dx = h_coords_x[path.back()] - h_coords_x[path[0]];
     double dy = h_coords_y[path.back()] - h_coords_y[path[0]];
-    final_distance = sqrt(dx * dx + dy * dy);
-    total_cost += final_distance;
+    total_cost += sqrt(dx * dx + dy * dy);
     
     // Cleaning up all the variables that we have used
     cudaFreeHost(h_coords_x);
