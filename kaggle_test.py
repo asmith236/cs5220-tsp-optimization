@@ -58,7 +58,7 @@ def tsp_dp(coordinates):
     best_path.append(0)
     return best_path, min_distance
 
-small = pd.read_csv('data/small.csv', names=['A', 'B'], header=None)
+small = pd.read_csv('data/small_20.csv', names=['A', 'B'], header=None)
 coordinates = small[['A', 'B']].values.tolist()
 
 best_path, min_distance = tsp_dp(coordinates)

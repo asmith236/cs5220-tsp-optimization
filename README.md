@@ -10,18 +10,18 @@ make clean
 
 ## For Correctness
 
-python utils/correctness.py --alg brute --csv tiny
+python utils/correctness.py --alg brute --csv tiny  
 
 ## For visualizer
 
-module load python
+module load python  
 python utils/visualizer.py tiny build/brute.out
 
 ## For Timing Comparison Graph
 
-module load python
-python utils/comparisons.py (tries all implementations)
-python utils/comparisons.py greedy dp (only compares greedy and dp)
+module load python  
+python utils/comparisons.py (tries all implementations)  
+python utils/comparisons.py greedy dp (only compares greedy and dp)  
 
 ## References
 
