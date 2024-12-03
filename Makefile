@@ -1,19 +1,26 @@
 CPP=g++
-NVCC=nvcc
+NVCC= nvcc -arch=sm_70
+NVCCFLAGS=-DCUDA
 CFLAGS=-lm
 OPTFLAGS=-O3 
+
+CFLAGS_DP=-lm -lnuma
+OPTFLAGS_DP=-O3 -march=native -mtune=native -fopenmp -ffast-math -funroll-loops -floop-parallelize-all -lm
+
 
 SRC_DIR=common
 ALGO_DIR=algorithms
 BUILD_DIR=build
 
-all: brute dp genetic cu_genetic
+all: brute dp genetic cu_genetic dp_omp
 
 brute: $(BUILD_DIR)/brute
 dp: $(BUILD_DIR)/dp
 greedy: $(BUILD_DIR)/greedy
 genetic: $(BUILD_DIR)/genetic
 cu_genetic: $(BUILD_DIR)/cu_genetic
+dp_omp: $(BUILD_DIR)/dp_omp
+greedy_cuda: $(BUILD_DIR)/greedy_cuda
 
 $(BUILD_DIR)/brute: $(SRC_DIR)/main.cpp $(ALGO_DIR)/brute.cpp
 	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
@@ -28,7 +35,13 @@ $(BUILD_DIR)/genetic: $(SRC_DIR)/main.cpp $(ALGO_DIR)/genetic.cpp
 	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
 
 $(BUILD_DIR)/cu_genetic: $(SRC_DIR)/main.cpp $(ALGO_DIR)/genetic.cu
-	$(NVCC) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
+	$(NVCC) $^ -o $@ $(NVCCFLAGS)
+
+$(BUILD_DIR)/dp_omp: $(SRC_DIR)/main.cpp $(ALGO_DIR)/dp_omp.cpp
+	$(CPP) $^ -o $@ $(CFLAGS_DP) $(OPTFLAGS_DP)
+
+$(BUILD_DIR)/greedy_cuda: $(SRC_DIR)/main.cpp $(ALGO_DIR)/greedy_cuda.cu
+	$(NVCC) $^ -o $@ $(NVCCFLAGS)
 
 .PHONY: clean
 
