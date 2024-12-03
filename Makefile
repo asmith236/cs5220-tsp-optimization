@@ -1,5 +1,6 @@
 CPP=g++
-NVCC=nvcc
+NVCC= nvcc -arch=sm_70
+NVCCFLAGS=-DCUDA
 CFLAGS=-lm
 OPTFLAGS=-O3 
 
@@ -19,6 +20,7 @@ greedy: $(BUILD_DIR)/greedy
 genetic: $(BUILD_DIR)/genetic
 cu_genetic: $(BUILD_DIR)/cu_genetic
 dp_omp: $(BUILD_DIR)/dp_omp
+greedy_cuda: $(BUILD_DIR)/greedy_cuda
 
 $(BUILD_DIR)/brute: $(SRC_DIR)/main.cpp $(ALGO_DIR)/brute.cpp
 	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
@@ -37,6 +39,9 @@ $(BUILD_DIR)/cu_genetic: $(SRC_DIR)/main.cpp $(ALGO_DIR)/genetic.cu
 
 $(BUILD_DIR)/dp_omp: $(SRC_DIR)/main.cpp $(ALGO_DIR)/dp_omp.cpp
 	$(CPP) $^ -o $@ $(CFLAGS_DP) $(OPTFLAGS_DP)
+
+$(BUILD_DIR)/greedy_cuda: $(SRC_DIR)/main.cpp $(ALGO_DIR)/greedy_cuda.cu
+	$(NVCC) $^ -o $@ $(NVCCFLAGS)
 
 .PHONY: clean
 
