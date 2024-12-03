@@ -16,71 +16,71 @@ double distance(const std::pair<double, double>& p1, const std::pair<double, dou
 
 TSPResult solve(const std::vector<std::pair<double, double>> &coordinates) {
 
-    const int n = coordinates.size(); // Number of nodes
+    int n = coordinates.size();
+    vector<vector<double>> distances(n, vector<double>(n));
 
-    // DP table to store the cost of visiting subsets of nodes
-    std::vector<std::vector<double>> dp(1 << n, std::vector<double>(n, MAX));
-    // Parent table to reconstruct the path
-    std::vector<std::vector<int>> parent(1 << n, std::vector<int>(n, -1));
-
-    // Base case: cost to go from node 0 to every other node
-    for (int k = 1; k < n; k++) {
-        dp[1 << k][k] = distance(coordinates[0], coordinates[k]);
+    // Compute all pairwise distances
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            distances[i][j] = distance(coordinates[i], coordinates[j]);
+        }
     }
 
-    // Iterate over subsets of size s
-    for (int s = 2; s < n; s++) {
-        for (int mask = 0; mask < (1 << n); mask++) {
-            // Skip invalid subsets
-            if (__builtin_popcount(mask) != s) continue;
+    // dp[mask][i] stores the minimum cost to visit all nodes in `mask` and end at node `i`
+    vector<vector<double>> dp(1 << n, vector<double>(n, INT_MAX));
+    dp[1][0] = 0;  // Base case: starting at node 0
 
-            // Iterate over all nodes in the subset
-            for (int k = 1; k < n; k++) {
-                if (!(mask & (1 << k))) continue; // Skip if k is not in the subset
-
-                // Find the minimum cost to reach k from any other node m in the subset
-                int prevMask = mask & ~(1 << k);
-                for (int m = 1; m < n; m++) {
-                    if (!(prevMask & (1 << m))) continue;
-                    double newCost = dp[prevMask][m] + distance(coordinates[m], coordinates[k]);
-                    if (newCost < dp[mask][k]) {
-                        dp[mask][k] = newCost;
-                        parent[mask][k] = m; // Track the previous node
-                    }
-                }
+    // Fill the dp table
+    for (int mask = 0; mask < (1 << n); mask++) {
+        for (int u = 0; u < n; u++) {
+            if ((mask & (1 << u)) == 0) continue;  // Skip if node `u` is not visited in this mask
+            for (int v = 0; v < n; v++) {
+                if ((mask & (1 << v)) == 0) continue;  // Skip if node `v` is not visited in this mask
+                dp[mask][u] = min(dp[mask][u], dp[mask ^ (1 << u)][v] + distances[v][u]);
             }
         }
     }
 
-    // Find the optimal tour cost and end node
-    double opt = MAX;
-    int lastNode = -1;
-    int fullMask = (1 << n) - 1;
-    for (int k = 1; k < n; k++) {
-        double newCost = dp[fullMask & ~(1 << 0)][k] + distance(coordinates[k], coordinates[0]);
-        if (newCost < opt) {
-            opt = newCost;
-            lastNode = k;
+    printf("DP:\n");
+    for (int mask = 0; mask < (1 << n); mask++) {  // Iterate through all subsets (2^n subsets)
+        for (int u = 0; u < n; u++) {  // Iterate through each node in the subset
+            printf("%f ", dp[mask][u]);  // Access and print the value for the current subset and node
         }
+        printf("\n");  // Move to the next line after each subset
+    }
+    // Find the minimum cost to complete the tour and return to the starting point (node 0)
+    double min_distance = INT_MAX;
+    for (int u = 1; u < n; u++) {
+        min_distance = min(min_distance, dp[(1 << n) - 1][u] + distances[u][0]);
     }
 
-    // Reconstruct the path
-    std::vector<int> best_path;
-    int currentMask = fullMask & ~(1 << 0);
-    int currentNode = lastNode;
-    while (currentNode != -1) {
-        best_path.push_back(currentNode);
-        int temp = currentNode;
-        currentNode = parent[currentMask][currentNode];
-        currentMask &= ~(1 << temp);
-    }
-    best_path.push_back(0); // Add the starting node
-    std::reverse(best_path.begin(), best_path.end());
+    // Reconstruct the best path
+    int mask = (1 << n) - 1;  // All nodes visited
+    int last = 0;  // Start at node 0
+    vector<int> best_path = {0};
 
-    // Return the result
-    TSPResult result;
-    result.cost = opt;
-    result.path = best_path;
-    return result;
+    for (int i = 1; i < n; i++) {
+        int next_city = -1;
+        double min_cost = INT_MAX;
+        
+        for (int v = 0; v < n; v++) {
+            if (mask & (1 << v)) {  // If node `v` is still unvisited in this mask
+                double cost = dp[mask][v] + distances[v][last];
+                if (cost < min_cost) {
+                    min_cost = cost;
+                    next_city = v;
+                }
+            }
+        }
+
+        best_path.push_back(next_city);
+        mask ^= (1 << next_city);  // Mark node `next_city` as visited
+        last = next_city;
+    }
+
+    best_path.push_back(0);  // Return to the starting node
+    
+    // Return the result as TSPResult struct
+    return TSPResult{min_distance, best_path};
 
 }
