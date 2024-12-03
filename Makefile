@@ -35,7 +35,7 @@ $(BUILD_DIR)/genetic: $(SRC_DIR)/main.cpp $(ALGO_DIR)/genetic.cpp
 	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
 
 $(BUILD_DIR)/cu_genetic: $(SRC_DIR)/main.cpp $(ALGO_DIR)/genetic.cu
-	$(NVCC) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
+	$(NVCC) $^ -o $@ $(NVCCFLAGS)
 
 $(BUILD_DIR)/dp_omp: $(SRC_DIR)/main.cpp $(ALGO_DIR)/dp_omp.cpp
 	$(CPP) $^ -o $@ $(CFLAGS_DP) $(OPTFLAGS_DP)
