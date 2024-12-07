@@ -1,5 +1,5 @@
 CPP=g++
-CFLAGS=-lm -lnuma
+CFLAGS=-lm # -lnuma
 OPTFLAGS=-O3 -march=native -mtune=native -fopenmp -ffast-math -funroll-loops -floop-parallelize-all -lm
 
 SRC_DIR=common
