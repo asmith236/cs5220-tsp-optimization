@@ -26,3 +26,4 @@ python utils/comparisons.py greedy dp (only compares greedy and dp)
 ## References
 
 https://www.kaggle.com/datasets/mexwell/traveling-salesman-problem/data
+https://www.kaggle.com/code/mexwell/solving-traveling-salesman-problem
