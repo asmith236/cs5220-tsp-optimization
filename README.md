@@ -8,6 +8,10 @@ make all
 ./build/brute --csv data/tiny.csv  
 make clean  
 
+## CUDA Configuration
+
+salloc --nodes 4 --ntasks-per-node=128 --qos interactive --time 01:00:00 --constraint gpu --account m4776
+
 ## For Correctness
 
 python utils/correctness.py --alg brute --csv tiny
