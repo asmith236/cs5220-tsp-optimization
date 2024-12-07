@@ -6,7 +6,11 @@ This CS 5220 final project aims to optimize the traveling salesman problem using
 
 make all  
 ./build/brute --csv data/tiny.csv  
-make clean  
+make clean
+
+# Methods to Run MPI
+
+module load mpich
 
 ## CUDA Configuration
 
@@ -31,3 +35,6 @@ python utils/comparisons.py greedy dp (only compares greedy and dp)
 
 Kaggle Dataset: https://www.kaggle.com/datasets/mexwell/traveling-salesman-problem/data  
 Mexwell Jupyter Notebook: https://www.kaggle.com/code/mexwell/solving-traveling-salesman-problem
+
+8.869446475106215200e-01,8.125700841807187436e-01
+9.113181348723439212e-01,5.282055260711114864e-01

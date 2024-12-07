@@ -1,3 +1,6 @@
+// #ifdef MPI
+#include <mpi.h>
+// #endif
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -50,6 +53,13 @@ void read_csv(const std::string &file_path, std::vector<std::pair<double, double
 }
 
 int main(int argc, char **argv) {
+// #ifdef MPI
+    int rank, num_procs;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+// #endif
+
     if (argc < 3) {
         std::cerr << "Usage: " << argv[0] << " --csv <file_path>" << std::endl;
         return 1;
@@ -77,7 +87,12 @@ int main(int argc, char **argv) {
     read_csv(csv_file, coordinates);
 
     // Solve and capture the result
-    TSPResult result = solve(coordinates);
+// #ifdef MPI
+    TSPResult result = solve(coordinates, rank, num_procs);
+    MPI_Finalize();
+// #else
+    // TSPResult result = solve(coordinates);
+// #endif
 
     // Determine the output file path
     std::string output_file_path = getOutputFilePath(argv[0]);
@@ -94,6 +109,7 @@ int main(int argc, char **argv) {
     printTSPResult(result, std::cout);
 
     out_file.close();
+    
 
     std::cout << "Result written to " << output_file_path << std::endl;
 
