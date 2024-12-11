@@ -87,6 +87,7 @@ def plot_results(results):
     }
     
     datasets = ['tiny', 'small', 'medium', 'large','huge','gigantic']
+    dataset_sizes = [10, 27, 100, 1000, '10k', '100k']  # New tick labels
     x_pos = range(len(datasets))
     
     # Plot 1: Log scale (good for small differences)
@@ -100,9 +101,8 @@ def plot_results(results):
     ax1.set_yscale('log')
     ax1.set_title('Log Scale Comparison')
     ax1.set_xticks(x_pos)
-    ax1.set_xlabel('Dataset')
-    ax1.set_ylabel('Log Scale (Seconds)')
-    ax1.set_xticklabels(datasets)
+    ax1.set_xlabel('Number of Cities')
+    ax1.set_xticklabels(dataset_sizes) 
     ax1.grid(True)
     ax1.legend()
     
@@ -114,11 +114,10 @@ def plot_results(results):
             ax2.plot(x_pos_filtered, [timings[d] for d in filtered_datasets], 
                     f'{colors[impl]}-o', 
                     label=f'{impl.capitalize()}')
-    ax2.set_title('Linear Scale Comparison')
+    ax2.set_title('Linear Scale Comparison (Seconds)')
     ax2.set_xticks(x_pos)
-    ax2.set_xticklabels(datasets)
-    ax2.set_ylabel('Seconds')
-    ax2.set_xlabel('Dataset')
+    ax2.set_xticklabels(dataset_sizes) 
+    ax2.set_xlabel('Number of Cities')
     ax2.grid(True)
     
     # Plot 3: Speedup relative to baseline (greedy)
@@ -135,8 +134,8 @@ def plot_results(results):
         ax3.axhline(y=1.0, color='k', linestyle='--')
         ax3.set_title('Speedup vs. Greedy')
         ax3.set_xticks(x_pos)
-        ax3.set_xticklabels(datasets)
-        ax3.set_ylabel('Speedup')
+        ax3.set_xticklabels(dataset_sizes) 
+        ax3.set_xlabel('Number of Cities')
         ax3.grid(True)
         ax3.legend()
     
