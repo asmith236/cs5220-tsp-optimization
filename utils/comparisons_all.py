@@ -4,6 +4,8 @@ import time
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from matplotlib.table import Table
 
 def run_implementation(exec_path: str, dataset: str) -> float:
     try:
@@ -15,6 +17,60 @@ def run_implementation(exec_path: str, dataset: str) -> float:
     except Exception as e:
         print(f"Error running {exec_path} with {dataset}: {e}")
         return -1
+
+def plot_table(results, datasets, implementations):
+    """Generate a table of execution times with proper axis labels and save as an image"""
+    data = []
+    for dataset in datasets:
+        row = []
+        for impl in implementations:
+            if dataset in results[impl]:
+                row.append(f"{results[impl][dataset]:.2f}")
+            else:
+                row.append("")  # Leave blank if no data
+        data.append(row)
+    
+    df = pd.DataFrame(data, columns=implementations, index=datasets)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.axis('tight')
+    ax.axis('off')
+    table = Table(ax, bbox=[0, 0, 1, 1])
+
+    # Add headers and cells with axis labels
+    n_rows, n_cols = df.shape
+    for i in range(n_rows + 1):
+        for j in range(n_cols + 1):
+            if i == 0 and j == 0:
+                # Top-left corner: Leave blank
+                text = ""
+            elif i == 0:
+                # Header row: Algorithms
+                text = df.columns[j - 1]
+            elif j == 0:
+                # Header column: Datasets
+                text = df.index[i - 1]
+            else:
+                # Data cells
+                text = df.iloc[i - 1, j - 1]
+            table.add_cell(
+                i, j,
+                width=1.0 / (n_cols + 1),
+                height=0.2,
+                text=text,
+                loc='center',
+                facecolor='white'
+            )
+    
+    # Add X and Y axis labels
+    table.auto_set_font_size(False)
+    table.set_fontsize(10)
+    ax.add_table(table)
+    ax.text(0.5, 1.05, 'Algorithm', fontsize=12, ha='center', transform=ax.transAxes)
+    ax.text(-0.05, 0.5, 'Datasets', fontsize=12, va='center', rotation='vertical', transform=ax.transAxes)
+
+    # plt.title("Execution Times (Seconds)", fontsize=14)
+    plt.savefig("execution_times_table.png", dpi=300, bbox_inches="tight")
+    print("Execution times table saved as execution_times_table.png")
 
 def plot_results(results):
     """Plot timing results with multiple views"""
@@ -42,6 +98,8 @@ def plot_results(results):
     ax1.set_yscale('log')
     ax1.set_title('Log Scale Comparison')
     ax1.set_xticks(x_pos)
+    ax1.set_xlabel('Dataset')
+    ax1.set_ylabel('Log Scale (Seconds)')
     ax1.set_xticklabels(datasets)
     ax1.grid(True)
     ax1.legend()
@@ -57,6 +115,8 @@ def plot_results(results):
     ax2.set_title('Linear Scale Comparison')
     ax2.set_xticks(x_pos)
     ax2.set_xticklabels(datasets)
+    ax2.set_ylabel('Seconds')
+    ax2.set_xlabel('Dataset')
     ax2.grid(True)
     
     # Plot 3: Speedup relative to baseline (greedy)
@@ -119,3 +179,4 @@ if __name__ == "__main__":
                 print(f"{impl.capitalize()}, {dataset}: {execution_time:.6f} seconds")
     
     plot_results(results)
+    plot_table(results, datasets, implementations)
