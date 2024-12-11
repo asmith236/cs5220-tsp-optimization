@@ -83,10 +83,8 @@ TSPResult solve(const std::vector<std::pair<double, double>> &coordinates) {
     double opt = MAX;
     int lastNode = -1;
     int fullMask = (1 << n) - 1;
-    #pragma omp parallel for schedule(static) reduction(min : opt)
     for (int k = 1; k < n; k++) {
         double newCost = dp[(fullMask & ~(1 << 0)) * n + k] + distance(coordinates[k], coordinates[0]);
-        #pragma omp critical
         if (newCost < opt) {
             opt = newCost;
             lastNode = k;
