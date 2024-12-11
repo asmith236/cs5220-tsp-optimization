@@ -83,32 +83,6 @@ def plot_table(results, dataset_sizes, implementations):
     plt.savefig("execution_times_table.png", dpi=300, bbox_inches="tight")
     print("Execution times table saved as execution_times_table.png")
 
-# def plot_table(results, dataset_sizes, implementations):
-#     """Generate a table of execution times with proper axis labels and save as an image."""
-#     data = []
-#     for size in dataset_sizes:
-#         row = []
-#         for impl in implementations:
-#             if size in results[impl]:
-#                 row.append(f"{results[impl][size]:.2f}")
-#             else:
-#                 row.append("")  # Leave blank if no data
-#         data.append(row)
-    
-#     df = pd.DataFrame(data, columns=implementations, index=dataset_sizes)
-#     fig, ax = plt.subplots(figsize=(8, 6))
-#     ax.axis('tight')
-#     ax.axis('off')
-
-#     table = ax.table(cellText=df.values, colLabels=df.columns, rowLabels=df.index,
-#                      loc='center', cellLoc='center')
-#     table.auto_set_font_size(False)
-#     table.set_fontsize(10)
-
-#     ax.set_title("Execution Times (Seconds)", fontsize=14)
-#     plt.savefig("execution_times_table.png", dpi=300, bbox_inches="tight")
-#     print("Execution times table saved as execution_times_table.png")
-
 def plot_results(results):
     """Plot timing results with multiple views"""
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 6))
@@ -158,17 +132,17 @@ def plot_results(results):
     ax2.grid(True)
 
     # Plot 3: Speedup relative to baseline (greedy)
-    if 'greedy' in results:
-        baseline = results['greedy']
+    if 'dp' in results:
+        baseline = results['dp']
         for impl, timings in results.items():
-            if impl != 'greedy' and timings:
+            if impl != 'dp' and timings:
                 filtered_sizes = [size for size in dataset_sizes if size in timings and size in baseline]
                 x_pos_filtered = [dataset_sizes.index(size) for size in filtered_sizes]
                 speedups = [baseline[size] / timings[size] for size in filtered_sizes]
                 ax3.plot(x_pos_filtered, speedups, 
                          '-o', color=colors[impl], label=f'{impl.capitalize()}')  # Use explicit color
         ax3.axhline(y=1.0, color='k', linestyle='--')
-        ax3.set_title('Speedup vs. Greedy')
+        ax3.set_title('Speedup vs. DP')
         ax3.set_xticks(x_pos)
         ax3.set_xticklabels(dataset_sizes)
         ax3.set_xlabel('Number of Cities')
