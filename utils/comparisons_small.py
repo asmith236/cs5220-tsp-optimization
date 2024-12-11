@@ -114,7 +114,6 @@ def plot_results(results):
     ax1.set_xticks(x_pos)
     ax1.set_xticklabels(dataset_sizes)
     ax1.set_xlabel('Number of Cities')
-    ax1.set_ylabel('Log Scale (Seconds)')
     ax1.grid(True)
     ax1.legend()
 
@@ -125,7 +124,7 @@ def plot_results(results):
             x_pos_filtered = [dataset_sizes.index(size) for size in filtered_sizes]  # Map sizes to X positions
             ax2.plot(x_pos_filtered, [timings[size] for size in filtered_sizes], 
                      '-o', color=colors[impl], label=f'{impl.capitalize()}')  # Use explicit color
-    ax2.set_title('Linear Scale Comparison (Seconds)')
+    ax2.set_title('Linear Scale Comparison')
     ax2.set_xticks(x_pos)
     ax2.set_xticklabels(dataset_sizes)
     ax2.set_xlabel('Number of Cities')
