@@ -13,7 +13,7 @@ SRC_DIR=common
 ALGO_DIR=algorithms
 BUILD_DIR=build
 
-all: brute dp genetic greedy genetic_cuda dp_omp dp_cuda greedy_cuda dp_numa
+all: brute dp genetic greedy genetic_cuda dp_omp dp_cuda greedy_cuda dp_omp_numa
 
 brute: $(BUILD_DIR)/brute
 dp: $(BUILD_DIR)/dp
@@ -23,7 +23,7 @@ genetic_cuda: $(BUILD_DIR)/genetic_cuda
 dp_omp: $(BUILD_DIR)/dp_omp
 greedy_cuda: $(BUILD_DIR)/greedy_cuda
 dp_cuda: $(BUILD_DIR)/dp_cuda
-dp_numa: $(BUILD_DIR)/dp_numa
+dp_omp_numa: $(BUILD_DIR)/dp_omp_numa
 
 $(BUILD_DIR)/brute: $(SRC_DIR)/main.cpp $(ALGO_DIR)/brute.cpp
 	$(CPP) $^ -o $@ $(CFLAGS) $(OPTFLAGS)
@@ -49,7 +49,7 @@ $(BUILD_DIR)/greedy_cuda: $(SRC_DIR)/main.cpp $(ALGO_DIR)/greedy_cuda.cu
 $(BUILD_DIR)/dp_cuda: $(SRC_DIR)/main.cpp $(ALGO_DIR)/dp_cuda.cu
 	$(NVCC) $^ -o $@ $(NVCCFLAGS)
 
-$(BUILD_DIR)/dp_numa: $(SRC_DIR)/main.cpp $(ALGO_DIR)/dp_numa.cpp
+$(BUILD_DIR)/dp_omp_numa: $(SRC_DIR)/main.cpp $(ALGO_DIR)/dp_omp_numa.cpp
 	$(CPP) $^ -o $@ $(CFLAGS_NUMA) $(OPTFLAGS_DP)
 
 .PHONY: clean

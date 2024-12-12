@@ -1,4 +1,3 @@
-// 0m40.416s
 #include <bits/stdc++.h>
 #include <omp.h> // Include OpenMP header for parallelization
 #include <vector>
