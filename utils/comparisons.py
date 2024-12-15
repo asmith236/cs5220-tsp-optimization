@@ -20,6 +20,7 @@ def run_implementation(exec_path: str, dataset: str) -> float:
 
 def plot_table(results, datasets, implementations):
     """Generate a table of execution times with proper axis labels and save as an image"""
+    dataset_sizes = [10, 15, 20, 25, 100, 1000, "10k", "100k"] 
     data = []
     for dataset in datasets:
         row = []
@@ -30,7 +31,7 @@ def plot_table(results, datasets, implementations):
                 row.append("")  # Leave blank if no data
         data.append(row)
     
-    df = pd.DataFrame(data, columns=implementations, index=datasets)
+    df = pd.DataFrame(data, columns=implementations, index=dataset_sizes)
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.axis('tight')
     ax.axis('off')
@@ -66,7 +67,7 @@ def plot_table(results, datasets, implementations):
     table.set_fontsize(10)
     ax.add_table(table)
     ax.text(0.5, 1.05, 'Algorithm', fontsize=12, ha='center', transform=ax.transAxes)
-    ax.text(-0.05, 0.5, 'Datasets', fontsize=12, va='center', rotation='vertical', transform=ax.transAxes)
+    ax.text(-0.05, 0.5, 'Number of Cities', fontsize=12, va='center', rotation='vertical', transform=ax.transAxes)
 
     plt.savefig("execution_times_table.png", dpi=300, bbox_inches="tight")
     print("Execution times table saved as execution_times_table.png")
@@ -75,19 +76,21 @@ def plot_results(results):
     """Plot timing results with multiple views"""
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 6))
     
+    # Define line styles and valid single-character color codes or explicit color definitions
     colors = {
-        'brute': 'b',         # Blue
-        'greedy': 'g',        # Green
-        'genetic': 'r',       # Red
-        'dp': 'c',            # Cyan
-        'greedy_cuda': 'y',   # Yellow
-        'genetic_cuda': 'm',  # Magenta
-        'dp_omp': 'orange',   # Orange
-        'dp_cuda': 'purple'   # Purple
+        'brute': 'b',          # Blue
+        'greedy': 'g',         # Green
+        'genetic': 'm',        # Red
+        'dp': 'c',             # Cyan
+        'greedy_cuda': 'y',    # Yellow
+        'genetic_cuda': 'r',   # Magenta
+        'dp_omp': '#FFA500',   # Orange (RGB Hex Code)
+        'dp_cuda': '#800080',   # Purple (RGB Hex Code)
+        'dp_omp_numa': '#008080'
     }
-    
-    datasets = ['tiny', 'small', 'medium', 'large','huge','gigantic']
-    dataset_sizes = [10, 27, 100, 1000, '10k', '100k']  # New tick labels
+   
+    datasets = ['tiny', 'small_15', 'small_20', 'small_25', 'medium', 'large', 'huge', 'gigantic']
+    dataset_sizes = [10, 15, 20, 25, 100, 1000, "10k", "100k"] # New tick labels
     x_pos = range(len(datasets))
     
     # Plot 1: Log scale (good for small differences)
@@ -96,13 +99,12 @@ def plot_results(results):
             filtered_datasets = [d for d in datasets if d in timings]  # Filter valid datasets for this implementation
             x_pos_filtered = [datasets.index(d) for d in filtered_datasets]  # Map filtered datasets to x_pos indices
             ax1.plot(x_pos_filtered, [timings[d] for d in filtered_datasets], 
-                    f'{colors[impl]}-o', 
-                    label=f'{impl.capitalize()}')
+                     '-o', color=colors[impl], label=f'{impl.capitalize()}')  # Use explicit color
     ax1.set_yscale('log')
     ax1.set_title('Log Scale Comparison')
     ax1.set_xticks(x_pos)
+    ax1.set_xticklabels(dataset_sizes)
     ax1.set_xlabel('Number of Cities')
-    ax1.set_xticklabels(dataset_sizes) 
     ax1.grid(True)
     ax1.legend()
     
@@ -112,11 +114,10 @@ def plot_results(results):
             filtered_datasets = [d for d in datasets if d in timings]  # Filter valid datasets for this implementation
             x_pos_filtered = [datasets.index(d) for d in filtered_datasets]  # Map filtered datasets to x_pos indices
             ax2.plot(x_pos_filtered, [timings[d] for d in filtered_datasets], 
-                    f'{colors[impl]}-o', 
-                    label=f'{impl.capitalize()}')
+                     '-o', color=colors[impl], label=f'{impl.capitalize()}')  # Use explicit color
     ax2.set_title('Linear Scale Comparison (Seconds)')
     ax2.set_xticks(x_pos)
-    ax2.set_xticklabels(dataset_sizes) 
+    ax2.set_xticklabels(dataset_sizes)
     ax2.set_xlabel('Number of Cities')
     ax2.grid(True)
     
@@ -129,12 +130,11 @@ def plot_results(results):
                 x_pos_filtered = [datasets.index(d) for d in filtered_datasets]  # Map filtered datasets to x_pos indices
                 speedups = [baseline[d] / timings[d] for d in filtered_datasets]
                 ax3.plot(x_pos_filtered, speedups, 
-                        f'{colors[impl]}-o', 
-                        label=f'{impl.capitalize()}')
+                         '-o', color=colors[impl], label=f'{impl.capitalize()}')  # Use explicit color
         ax3.axhline(y=1.0, color='k', linestyle='--')
         ax3.set_title('Speedup vs. Greedy')
         ax3.set_xticks(x_pos)
-        ax3.set_xticklabels(dataset_sizes) 
+        ax3.set_xticklabels(dataset_sizes)
         ax3.set_xlabel('Number of Cities')
         ax3.grid(True)
         ax3.legend()
@@ -149,7 +149,7 @@ def plot_results(results):
         print(f"Could not display plot: {e}")
 
 if __name__ == "__main__":
-    all_implementations = ['brute', 'greedy', 'genetic', 'dp', 'greedy_cuda']
+    all_implementations = ['brute', 'greedy', 'genetic', 'dp', 'greedy_cuda', 'genetic_cuda', 'dp_omp', 'dp_cuda', 'dp_omp_numa']
     
     parser = argparse.ArgumentParser(description='Compare TSP implementations')
     parser.add_argument('implementations', 
@@ -159,10 +159,13 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     implementations = args.implementations if args.implementations else all_implementations
-    datasets = ['tiny', 'small', 'medium', 'large','huge','gigantic']
+    datasets = ['tiny', 'small_15', 'small_20', 'small_25', 'medium', 'large', 'huge', 'gigantic']
     cutoff = {
-        'brute': 'small',
+        'brute': 'small_15',
         'dp': 'medium',
+        'dp_omp': 'medium',
+        'dp_cuda': 'medium',
+        'dp_omp_numa': 'medium'
     }
     
     results = {}
